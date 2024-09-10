@@ -13,7 +13,6 @@ const PacienteList: React.FC = () => {
   const [pacientes, setPacientes] = useState<Paciente[]>([])
   const [erro, setErro] = useState<string | null>(null)
 
-
   useEffect(() => {
     const fetchPacientes = async () => {
       try {
