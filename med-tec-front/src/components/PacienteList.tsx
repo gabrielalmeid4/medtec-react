@@ -10,11 +10,10 @@ interface Paciente {
 }
 
 const PacienteList: React.FC = () => {
-  //Definindo a variável que armazena os pacientes
   const [pacientes, setPacientes] = useState<Paciente[]>([])
   const [erro, setErro] = useState<string | null>(null)
 
-  //Buscando os pacientes ao carregar a página
+
   useEffect(() => {
     const fetchPacientes = async () => {
       try {
@@ -45,7 +44,8 @@ const PacienteList: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {pacientes.map(paciente => (
+            {pacientes
+              .sort((a, b) => a.cod_pac - b.cod_pac).map(paciente => (
               <tr key={paciente.cod_pac}>
                 <td>{paciente.cod_pac}</td>
                 <td>{paciente.nome}</td>
