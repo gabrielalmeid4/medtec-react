@@ -26,6 +26,11 @@
 - **CSS**
 - **Axios** - Cliente HTTP para comunicação com o backend
 
+- ## Screenshots
+![React App - Brave 10_09_2024 12_03_35](https://github.com/user-attachments/assets/a170d689-2ee0-471b-8913-e861b2ae6cac)
+![React App - Brave 10_09_2024 12_22_44](https://github.com/user-attachments/assets/f38cc175-42fa-4e6a-831a-2b8680cce39c)
 
----
+
+
+
 
