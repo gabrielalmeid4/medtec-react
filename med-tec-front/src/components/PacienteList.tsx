@@ -51,7 +51,7 @@ const PacienteList: React.FC = () => {
                 <td>{paciente.cpf}</td>
                 <td>
                   <Link to={`/edit/${paciente.cod_pac}`}>Editar</Link> |{' '}
-                  <button>Deletar</button>
+                  <Link to={`/delete/${paciente.cod_pac}`}>Deletar</Link> |{' '}
                 </td>
               </tr>
             ))}

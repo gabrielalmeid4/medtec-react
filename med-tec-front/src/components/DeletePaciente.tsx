@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import api from '../services/api'
 import './Styles.css'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
+
 
 interface Paciente {
   cod_pac: number
@@ -12,7 +13,8 @@ interface Paciente {
   contato: string
 }
 
-const EditPaciente: React.FC = () => {
+const DeletePaciente: React.FC = () => {
+  const navigate = useNavigate();
   const [pacientes, setPacientes] = useState<Paciente[]>([])
   const [erro, setErro] = useState<string | null>(null)
   
@@ -57,15 +59,16 @@ const EditPaciente: React.FC = () => {
     event.preventDefault()
 
     try {
-      const alteraPaciente = { nome, cpf, dt_nasc: dtNasc, endereco, contato }
-      await api.put(`/pacientes/${cod_pac}`, alteraPaciente)
-      setMensagem('Dados do paciente alterados.')
+      await api.delete(`/pacientes/${cod_pac}`)
+      setMensagem(`Dados do paciente ${cod_pac} removidos do sistema.`)
       setTimeout(() => {
         setMensagem('')
+        navigate('/')
       }, 3000)
+     
     } catch (error) {
-      console.error('Erro ao alterar dados do paciente.', error)
-      setMensagem('Erro ao alterar dados do paciente.')
+      console.error('Erro ao remover os dados do paciente.', error)
+      setMensagem('Erro ao remover dados do paciente.')
       setTimeout(() => {
         setMensagem('')
       }, 3000)
@@ -82,8 +85,7 @@ const EditPaciente: React.FC = () => {
           <input
             type="text"
             value={nome}
-            onChange={(valor) => setNome(valor.target.value)}
-            required
+            readOnly
           />
         </div>
         <div className='div-form'>
@@ -91,8 +93,7 @@ const EditPaciente: React.FC = () => {
           <input
             type="text"
             value={cpf}
-            onChange={(valor) => setCpf(valor.target.value)}
-            required
+            readOnly
           />
         </div>
         <div className='div-form'>
@@ -100,8 +101,7 @@ const EditPaciente: React.FC = () => {
           <input
             type="date"
             value={dtNasc}
-            onChange={(valor) => setDtNasc(valor.target.value)}
-            required
+            readOnly
           />
         </div>
         <div className='div-form'>
@@ -109,7 +109,7 @@ const EditPaciente: React.FC = () => {
           <input
             type="text"
             value={endereco}
-            onChange={(valor) => setEndereco(valor.target.value)}
+            readOnly
           />
         </div>
         <div className='div-form'>
@@ -117,14 +117,14 @@ const EditPaciente: React.FC = () => {
           <input
             type="text"
             value={contato}
-            onChange={(valor) => setContato(valor.target.value)}
+            readOnly
           />
         </div>
-        <button type="submit" className='button'>Salvar Alterações</button>
+        <button type="submit" className='button'>Remover Paciente</button>
       </form>
       {mensagem && <p>{mensagem}</p>}
     </div>
   )
 }
 
-export default EditPaciente
+export default DeletePaciente
