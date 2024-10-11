@@ -27,10 +27,8 @@
 - **Axios** - Cliente HTTP para comunicação com o backend
 
 - ## Screenshots
-![React App - Brave 10_09_2024 12_03_35](https://github.com/user-attachments/assets/a170d689-2ee0-471b-8913-e861b2ae6cac)
-![React App - Brave 10_09_2024 12_22_44](https://github.com/user-attachments/assets/f38cc175-42fa-4e6a-831a-2b8680cce39c)
-
-
+![lista_pacientes](https://github.com/user-attachments/assets/adf04377-e0b2-406b-bfc3-1233081b8c7b)
+![React App - Brave 11_10_2024 11_55_22](https://github.com/user-attachments/assets/30bb9ac0-072c-4503-b5da-eec7d671f73c)
 
 ## Como rodar
 
