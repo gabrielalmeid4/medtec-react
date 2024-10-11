@@ -3,7 +3,6 @@ import api from '../services/api'
 import './Styles.css'
 import { useParams, useNavigate } from 'react-router-dom'
 
-
 interface Paciente {
   cod_pac: number
   nome: string
@@ -17,7 +16,8 @@ const DeletePaciente: React.FC = () => {
   const navigate = useNavigate();
   const [pacientes, setPacientes] = useState<Paciente[]>([])
   const [erro, setErro] = useState<string | null>(null)
-  
+  const [confirmarRemocao, setConfirmarRemocao] = useState(false)
+
   useEffect(() => {
     const fetchPacientes = async () => {
       try {
@@ -28,7 +28,7 @@ const DeletePaciente: React.FC = () => {
         console.error(error)
       }
     }
-  
+
     fetchPacientes()
   }, [])
 
@@ -51,7 +51,7 @@ const DeletePaciente: React.FC = () => {
         setContato(paciente.contato)
       }
     }
-  
+
     fetchPac()
   }, [pacientes, cod_pac])
 
@@ -65,20 +65,23 @@ const DeletePaciente: React.FC = () => {
         setMensagem('')
         navigate('/')
       }, 3000)
-     
+
     } catch (error) {
       console.error('Erro ao remover os dados do paciente.', error)
       setMensagem('Erro ao remover dados do paciente.')
       setTimeout(() => {
         setMensagem('')
       }, 3000)
-      setMensagem('')
     }
+  }
+
+  const handleCheckboxChange = () => {
+    setConfirmarRemocao(!confirmarRemocao)
   }
 
   return (
     <div className='container'>
-      <h1>Editar Paciente</h1>
+      <h1>Remover Paciente</h1>
       <form className='form' onSubmit={handleSubmit}>
         <div className='div-form'>
           <label>Nome: </label>
@@ -120,7 +123,19 @@ const DeletePaciente: React.FC = () => {
             readOnly
           />
         </div>
-        <button type="submit" className='button'>Remover Paciente</button>
+        <div className='div-form'>
+          <label>
+            <input
+              type="checkbox"
+              checked={confirmarRemocao}
+              onChange={handleCheckboxChange}
+            />
+            AVISO! Remover um paciente removerá todas as consultas associadas a ele. Marque esta caixa para prosseguir.
+          </label>
+        </div>
+        <button type="submit" className='button' disabled={!confirmarRemocao}>
+          Remover Paciente
+        </button>
       </form>
       {mensagem && <p>{mensagem}</p>}
     </div>

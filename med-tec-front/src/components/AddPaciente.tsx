@@ -3,7 +3,6 @@ import api from '../services/api'
 import './Styles.css'
 
 const AddPaciente: React.FC = () => {
-  //Definindo as variáveis de dados do paciente.
   const [nome, setNome] = useState('')
   const [cpf, setCpf] = useState('')
   const [dtNasc, setDtNasc] = useState('')
@@ -17,7 +16,6 @@ const AddPaciente: React.FC = () => {
     try {
       const novoPaciente = { nome, cpf, dt_nasc: dtNasc, endereco, contato }
       await api.post('/pacientes', novoPaciente)
-      //Resetando o formulário com strings vazias.
       setMensagem('')
       setNome('')
       setCpf('')
@@ -30,7 +28,7 @@ const AddPaciente: React.FC = () => {
       }, 3000)
     } catch (error) {
       console.error('Erro ao adicionar paciente', error)
-      setMensagem('Erro ao adicionar paciente!') //Exibindo mensagem de erro por alguns segundos.
+      setMensagem('Erro ao adicionar paciente!')
       setTimeout(() => {
         setMensagem('')
       }, 3000)
