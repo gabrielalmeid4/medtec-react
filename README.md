@@ -7,7 +7,7 @@
 ## 🚀 Funcionalidades
 
 - 📋 **Gerenciamento de Pacientes**: Adição, edição, exclusão e listagem de pacientes.
-- 🩺 **Registro de Consultas**: Cadastro de consultas médicas com informações detalhadas.
+- 🩺 **Registro de Consultas**: Cadastro de consultas médicas com suas informações.
 - 🔧 **Administração do Hospital**: Gestão de funcionários, cargos, médicos e supervisores.
 
 ---
