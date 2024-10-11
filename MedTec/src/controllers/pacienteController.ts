@@ -1,8 +1,8 @@
 import { Request, Response } from 'express'
 import { AppDataSource } from '../data-source'
 import { Paciente } from '../entity/Paciente'
+import { ILike, Like } from 'typeorm'
 
-// Obtém todos os pacientes
 export const getAllPacientes = async (req: Request, res: Response) => {
   try {
     const pacienteRepository = AppDataSource.getRepository(Paciente)
@@ -13,7 +13,20 @@ export const getAllPacientes = async (req: Request, res: Response) => {
   }
 }
 
-// Cria um paciente
+export const getPacienteById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params
+    const pacienteRepository = AppDataSource.getRepository(Paciente)
+    const paciente = await pacienteRepository.findOneBy({ cod_pac: parseInt(id) })
+    if (!paciente) {
+      return res.status(404).json({ message: 'Paciente não encontrado' })
+    }
+    res.json(paciente)
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao obter paciente', error })
+  }
+}
+
 export const createPaciente = async (req: Request, res: Response) => {
   try {
     const pacienteRepository = AppDataSource.getRepository(Paciente)
@@ -25,43 +38,37 @@ export const createPaciente = async (req: Request, res: Response) => {
   }
 }
 
-// Função para atualizar um paciente
 export const updatePaciente = async (req: Request, res: Response) => {
     try {
       const pacienteRepository = AppDataSource.getRepository(Paciente)
-      const { id } = req.params // ID do paciente a ser atualizado
-      const updatedData = req.body // Dados para atualizar
-  
-      // Verifica se o paciente existe
+      const { id } = req.params 
+      const updateDados = req.body 
+
       const paciente = await pacienteRepository.findOneBy({ cod_pac: parseInt(id) })
       if (!paciente) {
         return res.status(404).json({ message: 'Paciente não encontrado' })
       }
   
-      // Atualiza o paciente com os novos dados
-      pacienteRepository.merge(paciente, updatedData)
+      pacienteRepository.merge(paciente, updateDados)
       await pacienteRepository.save(paciente)
       res.json(paciente)
     } catch (error) {
       res.status(500).json({ message: 'Erro ao atualizar paciente', error })
     }
   }
-  
-  // Função para deletar um paciente
+
   export const deletePaciente = async (req: Request, res: Response) => {
     try {
       const pacienteRepository = AppDataSource.getRepository(Paciente)
-      const { id } = req.params // ID do paciente a ser deletado
-  
-      // Verifica se o paciente existe
+      const { id } = req.params 
+
       const paciente = await pacienteRepository.findOneBy({ cod_pac: parseInt(id) })
       if (!paciente) {
         return res.status(404).json({ message: 'Paciente não encontrado' })
       }
   
-      // Remove o paciente
       await pacienteRepository.remove(paciente)
-      res.status(204).send() // Responde com sucesso e sem conteúdo
+      res.status(204).send() 
     } catch (error) {
       res.status(500).json({ message: 'Erro ao deletar paciente', error })
     }
