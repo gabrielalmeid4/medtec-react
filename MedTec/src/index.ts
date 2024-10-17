@@ -6,6 +6,8 @@ import pacienteRoutes from './routes/pacienteRoutes'
 import consultaRoutes from './routes/consultaRoutes'
 
 const app = express()
+const PORT = process.env.PORT || 3000;
+
 app.use(express.json())
 app.use(cors())
 
@@ -15,7 +17,7 @@ app.use('/consultas', consultaRoutes)
 AppDataSource.initialize().then(async () => {
     console.log('Database connected')
 
-    app.listen(3000, () => {
+    app.listen(PORT, () => {
         console.log('Server running on port 3000.')
     });
 
