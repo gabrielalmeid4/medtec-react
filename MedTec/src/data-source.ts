@@ -9,14 +9,15 @@ import { Consulta } from "./entity/Consulta"
 
 export const AppDataSource = new DataSource({
     type: "postgres",
-    host: "localhost",
-    port: 5432,
-    username: "postgres",
-    password: "1234",
-    database: "medtec-bd",
+    host: "aws-0-sa-east-1.pooler.supabase.com", 
+    port: 6543, 
+    username: "postgres.uvvlxkpcdyuaqokwdgsi", 
+    password: "Ok3eNpCxZFdRDi7S", 
+    database: "postgres", 
     synchronize: true,
     logging: false,
     entities: [Paciente, Cargo, Funcionario, Medico, Especializacao, Consulta],
     migrations: [],
     subscribers: [],
 })
+
