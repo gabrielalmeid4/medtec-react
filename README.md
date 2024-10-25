@@ -30,7 +30,7 @@
 ![lista_pacientes](https://github.com/user-attachments/assets/adf04377-e0b2-406b-bfc3-1233081b8c7b)
 ![React App - Brave 11_10_2024 11_55_22](https://github.com/user-attachments/assets/30bb9ac0-072c-4503-b5da-eec7d671f73c)
 
-## Como rodar
+## Como rodar o projeto localmente
 
 ### 1. Instale as Dependências do Projeto
 
