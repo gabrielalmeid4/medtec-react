@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useReducer, useCallback, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import './Styles.css'
 import api from '../services/api'
@@ -9,18 +9,69 @@ interface Paciente {
   cpf: string
 }
 
+interface State {
+  pacientes: Paciente[]
+  erro: string | null
+  nomeBusca: string
+}
+
+type Action =
+  | { type: 'SET_PACIENTES'; pacientes: Paciente[] }
+  | { type: 'SET_ERRO'; erro: string }
+  | { type: 'SET_NOME_BUSCA'; nomeBusca: string }
+
+const initialState: State = {
+  pacientes: [],
+  erro: null,
+  nomeBusca: '',
+}
+
+const pacienteReducer = (state: State, action: Action): State => {
+  switch (action.type) {
+    case 'SET_PACIENTES':
+      return { ...state, pacientes: action.pacientes }
+    case 'SET_ERRO':
+      return { ...state, erro: action.erro }
+    case 'SET_NOME_BUSCA':
+      return { ...state, nomeBusca: action.nomeBusca }
+    default:
+      return state
+  }
+}
+
 const PacienteList: React.FC = () => {
-  const [pacientes, setPacientes] = useState<Paciente[]>([])
-  const [erro, setErro] = useState<string | null>(null)
-  const [nomeBusca, setNomeBusca] = useState('')
+  const [state, dispatch] = useReducer(pacienteReducer, initialState)
+
+  const { pacientes, erro, nomeBusca } = state
+
+  
+  const handleBusca = useCallback(async () => {
+    try {
+      if (nomeBusca) {
+        const pacientesBusca = pacientes.filter(
+          paciente =>
+            paciente.nome.includes(nomeBusca) ||
+            paciente.cpf === nomeBusca ||
+            paciente.cod_pac === parseInt(nomeBusca)
+        )
+        dispatch({ type: 'SET_PACIENTES', pacientes: pacientesBusca })
+      } else {
+        const response = await api.get('/pacientes')
+        dispatch({ type: 'SET_PACIENTES', pacientes: response.data })
+      }
+    } catch (error) {
+      dispatch({ type: 'SET_ERRO', erro: 'Erro ao buscar pacientes' })
+      console.error(error)
+    }
+  }, [nomeBusca, pacientes])
 
   useEffect(() => {
     const fetchPacientes = async () => {
       try {
         const response = await api.get('/pacientes')
-        setPacientes(response.data)
+        dispatch({ type: 'SET_PACIENTES', pacientes: response.data })
       } catch (error) {
-        setErro('Erro ao buscar pacientes')
+        dispatch({ type: 'SET_ERRO', erro: 'Erro ao buscar pacientes' })
         console.error(error)
       }
     }
@@ -28,20 +79,11 @@ const PacienteList: React.FC = () => {
     fetchPacientes()
   }, [])
 
-  const handleBusca = async () => {
-    try {
-      if (nomeBusca) {
-        const pacientesBusca = pacientes.filter(paciente => paciente.nome.includes(nomeBusca) || paciente.cpf === nomeBusca || paciente.cod_pac === parseInt(nomeBusca))
-        setPacientes(pacientesBusca)
-      } else {
-        const response = await api.get('/pacientes')
-        setPacientes(response.data)
-      }
-    } catch (error) {
-      setErro('Erro ao buscar pacientes')
-      console.error(error)
-    }
-  }
+  
+  const pacientesOrdenados = useMemo(
+    () => pacientes.sort((a, b) => a.cod_pac - b.cod_pac),
+    [pacientes]
+  )
 
   return (
     <div className="container">
@@ -51,7 +93,7 @@ const PacienteList: React.FC = () => {
           type="text"
           placeholder="Buscar"
           value={nomeBusca}
-          onChange={(e) => setNomeBusca(e.target.value)}
+          onChange={(e) => dispatch({ type: 'SET_NOME_BUSCA', nomeBusca: e.target.value })}
         />
         <button onClick={handleBusca}>Buscar</button>
       </div>
@@ -68,19 +110,17 @@ const PacienteList: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {pacientes
-              .sort((a, b) => a.cod_pac - b.cod_pac)
-              .map(paciente => (
-                <tr key={paciente.cod_pac}>
-                  <td>{paciente.cod_pac}</td>
-                  <td>{paciente.nome}</td>
-                  <td>{paciente.cpf}</td>
-                  <td>
-                    <Link to={`/edit/${paciente.cod_pac}`}>Editar</Link> |{' '}
-                    <Link to={`/delete/${paciente.cod_pac}`}>Deletar</Link> |{' '}
-                  </td>
-                </tr>
-              ))}
+            {pacientesOrdenados.map(paciente => (
+              <tr key={paciente.cod_pac}>
+                <td>{paciente.cod_pac}</td>
+                <td>{paciente.nome}</td>
+                <td>{paciente.cpf}</td>
+                <td>
+                  <Link to={`/edit/${paciente.cod_pac}`}>Editar</Link> |{' '}
+                  <Link to={`/delete/${paciente.cod_pac}`}>Deletar</Link>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       )}

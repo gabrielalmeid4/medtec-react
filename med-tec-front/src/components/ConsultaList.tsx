@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useReducer, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import './Styles.css'
 import api from '../services/api'
@@ -18,56 +18,78 @@ interface Consulta {
   status: boolean
 }
 
+interface State {
+  consultas: Consulta[]
+  pacientes: Paciente[]
+  erro: string | null
+}
+
+type Action =
+  | { type: 'SET_CONSULTAS'; consultas: Consulta[] }
+  | { type: 'SET_PACIENTES'; pacientes: Paciente[] }
+  | { type: 'SET_ERRO'; erro: string }
+
+const initialState: State = {
+  consultas: [],
+  pacientes: [],
+  erro: null,
+}
+
+const consultaReducer = (state: State, action: Action): State => {
+  switch (action.type) {
+    case 'SET_CONSULTAS':
+      return { ...state, consultas: action.consultas }
+    case 'SET_PACIENTES':
+      return { ...state, pacientes: action.pacientes }
+    case 'SET_ERRO':
+      return { ...state, erro: action.erro }
+    default:
+      return state
+  }
+}
+
 const ConsultaList: React.FC = () => {
-  const [consultas, setConsultas] = useState<Consulta[]>([])
-  const [pacientes, setPacientes] = useState<Paciente[]>([])
-  const [erro, setErro] = useState<string | null>(null)
+  const [state, dispatch] = useReducer(consultaReducer, initialState)
   const [nomeBusca, setNomeBusca] = useState('')
 
+  
   useEffect(() => {
     const fetchConsultas = async () => {
       try {
         const response = await api.get('/consultas')
-        setConsultas(response.data)
+        dispatch({ type: 'SET_CONSULTAS', consultas: response.data })
       } catch (error) {
-        setErro('Erro ao buscar consultas')
+        dispatch({ type: 'SET_ERRO', erro: 'Erro ao buscar consultas' })
         console.error(error)
       }
     }
-
     fetchConsultas()
-  }, [])
 
-  useEffect(() => {
     const fetchPacientes = async () => {
       try {
         const response = await api.get('/pacientes')
-        setPacientes(response.data)
+        dispatch({ type: 'SET_PACIENTES', pacientes: response.data })
       } catch (error) {
-        setErro('Erro ao buscar pacientes')
+        dispatch({ type: 'SET_ERRO', erro: 'Erro ao buscar pacientes' })
         console.error(error)
       }
     }
-
     fetchPacientes()
   }, [])
 
-  const handleBusca = async () => {
-    try {
-      if (nomeBusca) {
-        const consultasBusca = consultas.filter(consulta => consulta.cod_pac === parseInt(nomeBusca) || consulta.cod_consul === parseInt(nomeBusca) || 
-                                                consulta.motivo.includes((nomeBusca)) || pacientes.find(paciente => paciente.cod_pac === consulta.cod_pac)?.nome.includes(nomeBusca))
-        setConsultas(consultasBusca)
-      } else {
-        const response = await api.get('/consultas')
-        setConsultas(response.data)
-      }
-    } catch (error) {
-      setErro('Erro ao buscar consultas')
-      console.error(error)
-    }
-  }
-
+  const handleBusca = useCallback(() => {
+    const buscaNome = nomeBusca.toLowerCase()
+    const consultasBusca = state.consultas.filter((consulta) => {
+      const paciente = state.pacientes.find((p) => p.cod_pac === consulta.cod_pac)
+      return (
+        consulta.cod_pac.toString().includes(buscaNome) ||
+        consulta.cod_consul.toString().includes(buscaNome) ||
+        consulta.motivo.toLowerCase().includes(buscaNome) ||
+        (paciente && paciente.nome.toLowerCase().includes(buscaNome))
+      )
+    })
+    dispatch({ type: 'SET_CONSULTAS', consultas: consultasBusca })
+  }, [nomeBusca, state.consultas, state.pacientes])
 
   return (
     <div className="container">
@@ -81,8 +103,8 @@ const ConsultaList: React.FC = () => {
         />
         <button onClick={handleBusca}>Buscar</button>
       </div>
-      {erro ? (
-        <p className="error">{erro}</p>
+      {state.erro ? (
+        <p className="error">{state.erro}</p>
       ) : (
         <table>
           <thead>
@@ -98,23 +120,28 @@ const ConsultaList: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {consultas
+            {state.consultas
               .sort((a, b) => a.cod_consul - b.cod_consul)
-              .map(consulta => (
-                <tr key={consulta.cod_consul}>
-                  <td>{consulta.cod_consul}</td>
-                  <td>{consulta.cod_pac}</td> 
-                  <td>{pacientes.find(paciente => paciente.cod_pac === consulta.cod_pac)?.nome}</td> 
-                  <td>{consulta.motivo}</td>
-                  <td>{new Date(consulta.dt_prev_consulta).toLocaleDateString()}</td>
-                  <td>R${consulta.valor.toFixed(2)}</td>
-                  <td>{consulta.status ? 'Concluída' : 'Pendente'}</td>
-                  <td>
-                    <Link to={`/edit-consulta/${consulta.cod_consul}`}>Editar</Link> |{' '}
-                    <Link to={`/delete-consulta/${consulta.cod_consul}`}>Deletar</Link>
-                  </td>
-                </tr>
-              ))}
+              .map((consulta) => {
+                const paciente = state.pacientes.find(
+                  (paciente) => paciente.cod_pac === consulta.cod_pac
+                )
+                return (
+                  <tr key={consulta.cod_consul}>
+                    <td>{consulta.cod_consul}</td>
+                    <td>{consulta.cod_pac}</td>
+                    <td>{paciente?.nome}</td>
+                    <td>{consulta.motivo}</td>
+                    <td>{new Date(consulta.dt_prev_consulta).toLocaleDateString()}</td>
+                    <td>R${consulta.valor.toFixed(2)}</td>
+                    <td>{consulta.status ? 'Concluída' : 'Pendente'}</td>
+                    <td>
+                      <Link to={`/edit-consulta/${consulta.cod_consul}`}>Editar</Link> |{' '}
+                      <Link to={`/delete-consulta/${consulta.cod_consul}`}>Deletar</Link>
+                    </td>
+                  </tr>
+                )
+              })}
           </tbody>
         </table>
       )}
